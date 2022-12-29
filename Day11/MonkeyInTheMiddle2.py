@@ -1,131 +1,4 @@
 import re
-import math
-
-def getPrimeFactors(num):
-    result = []
-    # even number divisible
-    while num % 2 == 0:
-        result.append(2)
-        num = num / 2
-
-    # n became odd
-    for i in range(3, int(math.sqrt(num)) + 1, 2):
-        while ((num % i) == 0):
-            result.append(i)
-            num = num / i
-    if num > 2:
-        result.append(num)
-    return result
-
-class Item:
-    def __init__(self, value):
-        if not isinstance(value, int):
-            raise ValueError("value must be int type")
-        self.__addors = [value]
-        self.__multipliersList = [[]]
-
-    @property
-    def addors(self):
-        return self.__addors
-
-    @addors.setter
-    def addors(self, value):
-        if not isinstance(value, list):
-            raise ValueError("value must be list type")
-        self.__addors = value.copy()
-
-    @property
-    def multipliersList(self):
-        return self.__multipliersList
-
-    @multipliersList.setter
-    def multipliersList(self, value):
-        if not isinstance(value, list):
-            raise ValueError("value must be list type")
-        self.__multipliersList = []
-        for multipliers in value:
-            self.__multipliersList.append(multipliers.copy())
-
-    def addAddor(self, value):
-        if isinstance(value, int):
-            self.addors.append(value)
-            self.multipliersList.append([])
-        elif isinstance(value, Item):
-            addorsCount = len(value.addors)
-            for i in range(addorsCount):
-                self.addors.append(value.addors[i])
-                self.multipliersList.append(value.multipliersList[i].copy())
-        else:
-            raise ValueError("invalid type of value")
-        size = len(self.addors)
-        if size < 100:
-            return
-        newAddors = []
-        newMultipliersList = []
-        step = 2
-        for i in range(0, size, step):
-            newAddor = 0
-            newMultipliers = []
-            end = min(size, i + step)
-            for j in range(i, end):
-                newAddor += self.addors[j]
-                for multiplier in self.multipliersList[j]:
-                    newAddor *= multiplier
-            newAddors.append(newAddor)
-            newMultipliersList.append(newMultipliers)
-        self.addors = newAddors
-        self.multipliersList = newMultipliersList
-
-    def addMultiplier(self, value):
-        if isinstance(value, int):
-            for multipliers in self.multipliersList:
-                multipliers.append(value)
-        elif isinstance(value, Item):
-            otherAddors = value.addors
-            otherMultipliersList = value.multipliersList
-            otherSize = len(otherAddors)
-            newAddors = []
-            newMultipliersList = []
-            for i in range(len(self.addors)):
-                addor = self.addors[i]
-                multipliers = self.multipliersList[i]
-                for j in range(otherSize):
-                    newAddors.append(addor)
-                    newMultipliers = multipliers.copy()
-                    newMultipliersList.append(newMultipliers)
-                    newMultipliers.append(otherAddors[j])
-                    newMultipliers.extend(otherMultipliersList[j])
-            self.addors = newAddors
-            self.multipliersList = newMultipliersList
-        else:
-            raise ValueError("value must be int type")
-
-
-    def divisableBy(self, value):
-        if not isinstance(value, int):
-            raise ValueError("value must be int type")
-        primeFactors = getPrimeFactors(value)
-        addors = self.addors.copy()
-        multipliersList = self.multipliersList.copy()
-        for primeFactor in primeFactors:
-            divisible = False
-            size = len(addors)
-            for i in range(size):
-                addor = addors[i]
-                multipliers = multipliersList[i]
-                if (addor % primeFactor) == 0:
-                    addors[i] = int(addor / primeFactor)
-                    divisible = True
-                    break
-
-                for j, multiplier in enumerate(multipliers):
-                    if (multiplier % primeFactor) == 0:
-                        multipliers[j] = int(multiplier / primeFactor)
-                        divisible = True
-                        break
-            if not divisible:
-                return False
-        return True
 
 class Monkey:
     NUM_PREFIX = "Monkey"
@@ -233,28 +106,28 @@ class Monkey:
         return self.__falseTarget
 
     def operate(self, item):
-        if not isinstance(item, Item):
+        if not isinstance(item, int):
             raise ValueError("item must be int type")
         result = item
         if self.__operator == "+":
             if self.__operand == self.OLD_OPERAND:
-                result.addAddor(item)
+                result += item
             else:
-                result.addAddor(int(self.__operand))
+                result += int(self.__operand)
         elif self.__operator == "*":
             if self.__operand == self.OLD_OPERAND:
-                result.addMultiplier(item)
+                result *= item
             else:
-                result.addMultiplier(int(self.__operand))
+                result *= int(self.__operand)
         else:
             raise Exception("Unknown operator: {}".format(self.__operator))
         return result
 
     def test(self, item):
-        if not isinstance(item, Item):
+        if not isinstance(item, int):
             raise ValueError("item must be int type")
         self.__inspectTimes += 1
-        return item.divisableBy(self.__divisor)
+        return (item % self.__divisor) == 0
 
 if __name__ == "__main__":
     overlapPairsCount = 0
@@ -273,8 +146,7 @@ if __name__ == "__main__":
             elif trimmedLine.startswith(Monkey.STARTING_ITEMS_PREFIX):
                 itemsTokens = trimmedLine[len(Monkey.STARTING_ITEMS_PREFIX):].split(",")
                 for itemToken in itemsTokens:
-                    item = Item(int(itemToken))
-                    monkey.items.append(item)
+                    monkey.items.append(int(itemToken))
             elif trimmedLine.startswith(Monkey.OPERATION_PREFIX):
                 monkey.operationStr = trimmedLine
             elif trimmedLine.startswith(Monkey.TEST_PREFIX):
