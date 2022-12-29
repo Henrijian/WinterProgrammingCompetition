@@ -96,8 +96,6 @@ class Monkey:
         target = int(matches[1])
         return target
 
-
-
 if __name__ == "__main__":
     overlapPairsCount = 0
     inputFile = open("input.txt", "r")
