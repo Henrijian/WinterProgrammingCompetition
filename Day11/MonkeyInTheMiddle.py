@@ -97,7 +97,6 @@ class Monkey:
         return target
 
 if __name__ == "__main__":
-    overlapPairsCount = 0
     inputFile = open("input.txt", "r")
     try:
         monkeys = []

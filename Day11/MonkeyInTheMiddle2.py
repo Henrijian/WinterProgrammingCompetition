@@ -105,7 +105,11 @@ class Monkey:
     def falseTarget(self):
         return self.__falseTarget
 
-    def operate(self, item):
+    @property
+    def divisor(self):
+        return self.__divisor
+
+    def operate(self, item, LCM):
         if not isinstance(item, int):
             raise ValueError("item must be int type")
         result = item
@@ -121,6 +125,7 @@ class Monkey:
                 result *= int(self.__operand)
         else:
             raise Exception("Unknown operator: {}".format(self.__operator))
+        result %= LCM
         return result
 
     def test(self, item):
@@ -130,7 +135,7 @@ class Monkey:
         return (item % self.__divisor) == 0
 
 if __name__ == "__main__":
-    overlapPairsCount = 0
+    LCM = 1  # Least Common Multiple
     inputFile = open("input.txt", "r")
     try:
         monkeys = []
@@ -151,18 +156,19 @@ if __name__ == "__main__":
                 monkey.operationStr = trimmedLine
             elif trimmedLine.startswith(Monkey.TEST_PREFIX):
                 monkey.testStr = trimmedLine
+                LCM *= monkey.divisor
             elif trimmedLine.startswith(Monkey.TRUE_PREFIX):
                 monkey.trueActionStr = trimmedLine
             elif trimmedLine.startswith(Monkey.FALSE_PREFIX):
                 monkey.falseActionStr = trimmedLine
 
-        for i in range(20):
+        for i in range(10000):
             print("round {}".format(i+1))
             for monkey in monkeys:
                 items = monkey.items
                 for j in range(len(items)):
                     item = items.pop(0)
-                    item = monkey.operate(item)
+                    item = monkey.operate(item, LCM)
                     if monkey.test(item):
                         target = monkey.trueTarget
                     else:
