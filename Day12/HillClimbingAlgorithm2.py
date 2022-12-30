@@ -31,51 +31,14 @@ def getNeighbors(grid, currRow, currCol):
         if not (0 <= nextRow < rowCount and 0 <= nextCol < colCount):
             continue
         nextHeight = height(grid[nextRow][nextCol])
-        if not ((nextHeight - currHeight) <= 1):
+        if not ((currHeight - nextHeight) <= 1):
             continue
         result.append([nextRow, nextCol])
     return result
 
-def stepsToEnd(grid, startRow, startCol, endRow, endCol):
-    if not (isinstance(grid, list) and isinstance(grid[0], list)):
-        raise ValueError("grid is not a matrix")
-    rowCount = len(grid)
-    colCount = len(grid[0])
-    if not isinstance(startRow, int):
-        raise ValueError("startRow must be int type")
-    if not isinstance(startCol, int):
-        raise ValueError("startCol must be int type")
-    if not (0 <= startRow < rowCount and 0 <= startCol < colCount):
-        raise ValueError("start row and col are not in the grid")
-    if not isinstance(endRow, int):
-        raise ValueError("endRow must be int type")
-    if not isinstance(endCol, int):
-        raise ValueError("endCol must be int type")
-    if not (0 <= endRow < rowCount and 0 <= endCol < colCount):
-        raise ValueError("end row and col are not in the grid")
-    result = rowCount * colCount
-    visited = [[False] * colCount for _ in range(rowCount)]
-    heap = [(0, startRow, startCol)]
-    while len(heap) > 0:
-        steps, row, col = heappop(heap)
-
-        if visited[row][col]:
-            continue
-        visited[row][col] = True
-
-        if (row == endRow) and (col == endCol):
-            result = steps
-            break
-
-        neighbors = getNeighbors(grid, row, col)
-        for neighbor in neighbors:
-            heappush(heap, (steps + 1, neighbor[0], neighbor[1]))
-    return result
-
 if __name__ == "__main__":
     grid = []
-    startRows = []
-    startCols = []
+    visited = []
     endRow = -1
     endCol = -1
     with open("input.txt", "r") as inputFile:
@@ -84,25 +47,30 @@ if __name__ == "__main__":
         trimmedLine = line.strip()
         gridRow = []
         for col, char in enumerate(trimmedLine):
-            if char == 'S' or char == 'a':
-                startRows.append(row)
-                startCols.append(col)
-            elif char == 'E':
+            if char == 'E':
                 endRow = row
                 endCol = col
             gridRow.append(char)
         grid.append(gridRow)
-    rowCount = len(grid)
+        visited.append([False] * len(gridRow))
     colCount = len(grid[0])
+    rowCount = len(grid)
 
-    minSteps = rowCount * colCount
-    for i in range(len(startRows)):
-        startRow = startRows[i]
-        startCol = startCols[i]
-        steps = stepsToEnd(grid, startRow, startCol, endRow, endCol)
-        if steps < minSteps:
-            minSteps = steps
-    print(minSteps)
+    heap = [(0, endRow, endCol)]
+    while True:
+        steps, row, col = heappop(heap)
+
+        if visited[row][col]:
+            continue
+        visited[row][col] = True
+
+        if height(grid[row][col]) == height('a'):
+            print(steps)
+            break
+
+        neighbors = getNeighbors(grid, row, col)
+        for neighbor in neighbors:
+            heappush(heap, (steps + 1, neighbor[0], neighbor[1]))
 
 
 
